@@ -2,6 +2,7 @@
 - [How many replication factor?](#how-many-replication-factor)
 - [How many brokers should I have](#how-many-brokers-should-i-have)
 - [acks and their effect](#acks-and-their-effect)
+- [Notes on serialization](#notes-on-serialization)
 - [Kafka Properties tuning](#kafka-properties-tuning)
   - [flush.offset.interval.ms](#flushoffsetintervalms)
   - [vm.dirty\_ratio](#vmdirty_ratio)
@@ -15,6 +16,8 @@
       - [acks.all](#acksall)
     - [Sink connectors](#sink-connectors)
       - ["delivery.guarantee": "exactly\_once",](#deliveryguarantee-exactly_once)
+- [Producers](#producers)
+  - [Notes on producers](#notes-on-producers)
   - [Relationship between `linger.ms`, `batch-size`, `record-queue-time-avg` and `request-latency-avg`](#relationship-between-lingerms-batch-size-record-queue-time-avg-and-request-latency-avg)
 - [Consumer offsets](#consumer-offsets)
 - [Metrics for GMS](#metrics-for-gms)
@@ -45,6 +48,11 @@ If N is your replication factor for topics, then you can get N-1 nodes to faile 
 consquence: if leader is down is unelected yet, then data can be lost.
 - acks=all - wait for all replicas to ack   - is the safest, but slowest since have to wait for all replicas to ack.
 
+# Notes on serialization
+
+- avro enables evolution of schema without breaking, but corresponding method to get the missing fields will return null
+- avro requires that the deserializer has access to the schema during the time application wrote the message even if the consumer application is using a different schema
+
 # Kafka Properties tuning
 ## flush.offset.interval.ms
 ## vm.dirty_ratio
@@ -64,6 +72,15 @@ consquence: if leader is down is unelected yet, then data can be lost.
 
 ### Sink connectors
 #### "delivery.guarantee": "exactly_once",
+
+# Producers
+
+## Notes on producers
+
+- producer decides which partitions to write in advance, not brokers
+- if key=null, then round robin style to partition
+
+
 
 ## Relationship between `linger.ms`, `batch-size`, `record-queue-time-avg` and `request-latency-avg`
 - Low linger.ms Value:
